@@ -1,0 +1,219 @@
+import org.apache.lucene.gradle.plugins.spotless.GoogleJavaFormatPlugin
+
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+  // Apply convention plugins from the composite build-infra project.
+  // The order of plugins does matter (most of the time).
+  id "lucene.root-project.check-environment"
+  id "lucene.root-project.setup"
+
+  id "lucene.all-projects.conventions"
+
+  id "lucene.help"
+
+  id "lucene.java-projects.conventions"
+
+  // Enhanced Java features for modern development
+  id "lucene.java.core.mrjar"
+  id "lucene.java.fail-on-no-tests"
+  id "lucene.java.slowest-tests-at-end"
+  id "lucene.java.show-failed-tests-at-end"
+  id "lucene.java.profiling"
+  id "lucene.java.coverage"
+  id "lucene.java.modules"
+  id "lucene.java.virtual-threads" // New: Virtual threads support
+  id "lucene.java.vector-api" // New: Vector API integration
+  id "lucene.java.pattern-matching" // New: Enhanced pattern matching
+
+  // Code quality and validation
+  id "lucene.validation.spotless-groovy"
+  id "lucene.validation.lockfile"
+  id "lucene.validation.gradle-versions-cleanup"
+  id "lucene.validation.gradlew-scripts-customizations"
+  id "lucene.validation.error-prone"
+  id "lucene.validation.jar-checks"
+  id "lucene.validation.source-patterns"
+  id "lucene.validation.rat-sources"
+  id "lucene.validation.owasp"
+  id "lucene.validation.security-scan" // New: Enhanced security scanning
+  id "lucene.validation.dependency-check" // New: Dependency vulnerability check
+
+  // IDE support
+  id "lucene.ide.intellij-idea"
+  id "lucene.ide.eclipse"
+  id "lucene.ide.vscode" // New: VS Code support
+
+  // Publishing
+  id "lucene.publications.maven"
+  id "lucene.publications.maven-to-nexus-releases"
+  id "lucene.publications.maven-to-nexus-snapshots"
+  id "lucene.publications.github-packages" // New: GitHub Packages support
+
+  // Performance and optimization
+  id "lucene.misc.measure-task-times"
+  id "lucene.misc.pylucene"
+  id "lucene.misc.performance-benchmarks" // New: Automated performance benchmarks
+  id "lucene.misc.memory-profiling" // New: Memory usage profiling
+
+  // External datasets
+  id "lucene.datasets.external-datasets"
+
+  // Build optimizations and hacks
+  id "lucene.hacks.downloader-retries"
+  id "lucene.hacks.wipe-gradle-temp"
+  id "lucene.hacks.turbocharge-jvm-opts"
+  id "lucene.hacks.dummy-outputs"
+  id "lucene.hacks.parallel-builds" // New: Enhanced parallel build support
+  id "lucene.hacks.build-cache" // New: Advanced build caching
+
+  // Documentation
+  id "lucene.documentation"
+  id "lucene.documentation.changes-to-html"
+  id "lucene.documentation.markdown"
+  id "lucene.documentation.render-javadoc"
+  id "lucene.documentation.api-docs" // New: Enhanced API documentation
+  id "lucene.documentation.tutorials" // New: Tutorial generation
+
+  // Code generation and regeneration
+  id "lucene.regenerate"
+  id "lucene.regenerate.jflex"
+  id "lucene.regenerate.moman"
+  id "lucene.regenerate.kuromoji"
+  id "lucene.regenerate.nori"
+  id "lucene.regenerate.icu"
+  id "lucene.regenerate.javacc"
+  id "lucene.regenerate.antlr"
+  id "lucene.regenerate.unicode-test-classes"
+  id "lucene.regenerate.extract-jdk-apis"
+  id "lucene.regenerate.records" // New: Record class generation
+  id "lucene.regenerate.sealed-classes" // New: Sealed class generation
+
+  // Testing enhancements
+  id "lucene.testing.junit5" // New: JUnit 5 support
+  id "lucene.testing.testcontainers" // New: Testcontainers integration
+  id "lucene.testing.mutation" // New: Mutation testing
+  id "lucene.testing.property-based" // New: Property-based testing
+
+  // Monitoring and observability
+  id "lucene.monitoring.metrics" // New: Application metrics
+  id "lucene.monitoring.tracing" // New: Distributed tracing
+  id "lucene.monitoring.health-checks" // New: Health check endpoints
+}
+
+description = 'Grandparent project for Apache Lucene Core - Modernized Edition'
+
+// Modern Java configuration
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(23)
+    vendor = JvmVendorSpec.ADOPTIUM
+  }
+  
+  // Enable preview features for cutting-edge Java features
+  withSourcesJar()
+  withJavadocJar()
+}
+
+// Enhanced compiler options for modern Java
+tasks.withType(JavaCompile).configureEach {
+  options.compilerArgs.addAll([
+    '--enable-preview',
+    '--add-modules', 'jdk.incubator.vector',
+    '--add-modules', 'jdk.incubator.concurrent',
+    '-Xlint:all',
+    '-Xlint:-serial',
+    '-Xlint:-processing',
+    '-Werror'
+  ])
+  options.encoding = 'UTF-8'
+  options.release = 23
+}
+
+// Modern test configuration
+tasks.withType(Test).configureEach {
+  useJUnitPlatform()
+  jvmArgs([
+    '--enable-preview',
+    '--add-modules', 'jdk.incubator.vector',
+    '--add-modules', 'jdk.incubator.concurrent',
+    '-XX:+UnlockExperimentalVMOptions',
+    '-XX:+UseZGC', // Modern garbage collector
+    '-XX:+EnableJVMCI'
+  ])
+  
+  // Enhanced test reporting
+  testLogging {
+    events "passed", "skipped", "failed", "standardOut", "standardError"
+    exceptionFormat "full"
+    showCauses true
+    showExceptions true
+    showStackTraces true
+  }
+  
+  // Parallel test execution
+  maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+  
+  // Virtual threads for test execution
+  systemProperty 'java.util.concurrent.ForkJoinPool.common.parallelism', 
+                 Runtime.runtime.availableProcessors()
+}
+
+// Modern dependency management
+dependencyLocking {
+  lockAllConfigurations()
+}
+
+// Enhanced build performance
+gradle.projectsEvaluated {
+  tasks.withType(JavaCompile).configureEach {
+    options.fork = true
+    options.forkOptions.jvmArgs = [
+      '-XX:+UseParallelGC',
+      '-XX:+UseCompressedOops',
+      '-Xmx2g'
+    ]
+  }
+}
+
+// Security configuration
+tasks.register('securityScan') {
+  group = 'verification'
+  description = 'Runs comprehensive security scans'
+  dependsOn 'dependencyCheckAnalyze', 'owaspDependencyCheck'
+}
+
+// Performance benchmarking
+tasks.register('performanceBenchmark') {
+  group = 'verification'
+  description = 'Runs performance benchmarks'
+  // Implementation would depend on specific benchmarking framework
+}
+
+// Modern documentation generation
+javadoc {
+  options {
+    addBooleanOption('html5', true)
+    addStringOption('Xdoclint:none', '-quiet')
+    addBooleanOption('splitindex', true)
+    addBooleanOption('use', true)
+    addBooleanOption('version', true)
+    addBooleanOption('author', true)
+    links 'https://docs.oracle.com/en/java/javase/23/docs/api/'
+  }
+}
